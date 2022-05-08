@@ -28,6 +28,12 @@ const item3 = new Item({
 
 const defaultItems = [item1, item2, item3];
 
+const listSchema = {
+    name: String,
+    items: [itmesSchema]
+};
+const List = mongoose.model('List', listSchema);
+
 
 
 
@@ -39,8 +45,7 @@ app.get("/", (req, res) => {
             Item.insertMany(defaultItems, function (err) {
                 if (err) console.log(err);
                 else {
-                    console.log('Successfully Saved')
-
+                    console.log('Successfully Saved');
                 }
             });
             res.redirect("/");
@@ -53,15 +58,46 @@ app.get("/", (req, res) => {
 });
 
 app.post("/", (req, res) => {
-    var item = req.body.newItem;
-    if (req.body.list === 'Work') {
-        workItems.push(item);
-        res.redirect("/work");
-    } else {
-        items.push(item);
-        res.redirect("/");
-    }
+    var itemName = req.body.newItem;
+    const item = new Item({
+        name: itemName
+    })
+    item.save();
+    res.redirect('/');
 });
+
+app.get("/:customListName", function(req, res){
+    
+    const customsListName = req.params.customListName;
+    console.log(customsListName);
+
+    List.findOne({name:customsListName}, function (err, foundList){
+        if(!err){
+            if(!foundList){
+                // create new list
+                const list = new List({
+                    name: customsListName,
+                    items:defaultItems
+                }); 
+                list.save();
+                console.log("Doesn't exist!");
+                res.redirect('/' + customsListName);
+            }else{
+                //show an exiting list
+                res.render("list", { listTitle: foundList.name, newItems: list.items });
+
+                console.log("Exits");
+            }
+        }
+    });
+
+    const list = new List({
+        name: customsListName,
+        items:defaultItems
+    }); 
+    list.save();
+});
+
 app.get("/work", (req, res) => {
     res.render("list", { listTitle: "Work List", newItems: workItems })
 });
