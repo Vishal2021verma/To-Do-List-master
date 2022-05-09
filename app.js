@@ -57,6 +57,7 @@ app.get("/", (req, res) => {
 
 });
 
+
 app.post("/", (req, res) => {
     var itemName = req.body.newItem;
     const item = new Item({
@@ -66,37 +67,47 @@ app.post("/", (req, res) => {
     res.redirect('/');
 });
 
-app.get("/:customListName", function(req, res){
-    
-    const customsListName = req.params.customListName;
-    console.log(customsListName);
-
-    List.findOne({name:customsListName}, function (err, foundList){
+app.post("/deleted", function(req,res){
+    const checkedItemId = req.body.checkbox;
+    Item.findByIdAndRemove(checkedItemId, function(err){
         if(!err){
-            if(!foundList){
-                // create new list
-                const list = new List({
-                    name: customsListName,
-                    items:defaultItems
-                }); 
-                list.save();
-                console.log("Doesn't exist!");
-                res.redirect('/' + customsListName);
-            }else{
-                //show an exiting list
-                res.render("list", { listTitle: foundList.name, newItems: list.items });
-
-                console.log("Exits");
-            }
-        }
-    });
-
-    const list = new List({
-        name: customsListName,
-        items:defaultItems
-    }); 
-    list.save();
+            console.log("Successfully deleted checked item.");
+        }    
+    })
+    res.redirect('/');
 });
+
+// app.get("/:customListName", function(req, res){
+    
+//     const customsListName = req.params.customListName;
+//     console.log(customsListName);
+
+//     List.findOne({name:customsListName}, function (err, foundList){
+//         if(!err){
+//             if(!foundList){
+//                 // create new list
+//                 const list = new List({
+//                     name: customsListName,
+//                     items:defaultItems
+//                 }); 
+//                 list.save();
+//                 console.log("Doesn't exist!");
+//                 res.redirect('/' + customsListName);
+//             }else{
+//                 //show an exiting list
+//                 res.render("list", { listTitle: foundList.name, newItems: list.items });
+
+//                 console.log("Exits");
+//             }
+//         }
+//     });
+
+//     const list = new List({
+//         name: customsListName,
+//         items:defaultItems
+//     }); 
+//     list.save();
+// });
 
 app.get("/work", (req, res) => {
     res.render("list", { listTitle: "Work List", newItems: workItems })
